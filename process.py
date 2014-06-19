@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os
+import os, sys
 import xlrd
 import csv
 import os.path
@@ -83,10 +83,12 @@ class Cell(object):
 		self.p2 = Point()
 
 	def makePandasDF(self):
-		dfdict = {}
+		bpdict = {}
+		gdict = {}
 		for s in self.stimulants:
-			dfdict[self.stimulants[s].name] = self.stimulants[s].basalToPeak()
-		return pd.DataFrame.from_dict({self.cellname: dfdict})
+			bpdict[self.stimulants[s].name] = self.stimulants[s].basalToPeak()
+			gdict[self.stimulants[s].name] = self.stimulants[s].gradient()
+		return {'bp':pd.DataFrame.from_dict({self.cellname: bpdict}), 'g':pd.DataFrame.from_dict({self.cellname: gdict})}
 
 numberOfStimulantsAdded = 0
 nameToUse = 0
@@ -177,6 +179,7 @@ if __name__ == '__main__':
 		directory = "~/Desktop/Ca"
 	)
 
+
 	experiment.names = ['0.01 ADP','0.1 ADP','1 ADP','10 ADP']
 	experiment.times = [101, 296, 519, 744]
 
@@ -188,12 +191,12 @@ if __name__ == '__main__':
 		print ''
 		print e.cellname
 		print '-------------------'
-		dfs.append(e.makePandasDF())
+		dfs.append(e.makePandasDF()['g'])
 		for s in e.stimulants:
 			stim = e.stimulants[s]
 
 
-	concat = pd.concat(dfs, axis=1)
+	concat = pd.concat(dfs, axis=1).T
 	print concat
 	concat.to_csv("/Users/garethprice/Desktop/Ca/analysed.csv")
 	concat.plot(kind='bar')
