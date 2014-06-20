@@ -5,7 +5,7 @@ import csv
 import os.path
 import pandas as pd
 import numpy as np
-
+import glob
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
@@ -13,13 +13,11 @@ from mpltools import style
 from mpltools import layout
 style.use('ggplot')
 
-from helpers import namedTuple
-
 class Point(dict):
-    """Python Objects that act like Javascript Objects"""
-    def __init__(self, *args, **kwargs):
-        super(Point, self).__init__(*args, **kwargs)
-        self.__dict__ = self
+	"""Python Objects that act like Javascript Objects"""
+	def __init__(self, *args, **kwargs):
+		super(Point, self).__init__(*args, **kwargs)
+		self.__dict__ = self
 
 class Stimulant(object):
 	"""docstring for Stimulant"""
@@ -90,6 +88,11 @@ class Cell(object):
 			gdict[self.stimulants[s].name] = self.stimulants[s].gradient()
 		return {'bp':pd.DataFrame.from_dict({self.cellname: bpdict}), 'g':pd.DataFrame.from_dict({self.cellname: gdict})}
 
+	def describe(self):
+		for s in self.stimulants:
+			print self.stimulants[s].description()
+
+
 numberOfStimulantsAdded = 0
 nameToUse = 0
 
@@ -104,14 +107,14 @@ class Experiment(object):
 		self.times = []
 
 		try:
-		    with open(self.directory + self.name+'.csv') as file:
-		        self.data = pd.read_csv(file)
-		    pass
+			with open(self.directory + self.name+'.csv') as file:
+				self.data = pd.read_csv(file)
+			pass
 		except IOError as e:
-		    self.convertXLSX()
-		    with open(self.directory + self.name+'.csv') as file:
-		    	self.data = pd.read_csv(file)
-		    pass
+			self.convertXLSX()
+			with open(self.directory + self.name+'.csv') as file:
+				self.data = pd.read_csv(file)
+			pass
 
 	def convertXLSX(self):
 			wb = xlrd.open_workbook(self.directory + self.name+".xlsx")
@@ -120,7 +123,7 @@ class Experiment(object):
 			wr = csv.writer(your_csv_file)
 
 			for rownum in xrange(sh.nrows):
-			    wr.writerow(sh.row_values(rownum))
+				wr.writerow(sh.row_values(rownum))
 
 			print 'Converted'
 
@@ -170,33 +173,59 @@ class Experiment(object):
 			self.cells.append(self.currentCell)
 			self.currentCell = Cell()
 
+	def save_csv(self, concat, type):
+		concat.to_csv(self.directory + self.name + "-compiled-"+ type.upper() +".csv")
+		print concat
 
+	def combineAllCsvsInDir(self):
+		bigDF = []
+
+		for f in glob.glob(self.directory+"*compiled-GRADIENT.csv"):
+			df = pd.read_csv(f)
+			bigDF.append(df)
+
+		concat = pd.concat(bigDF)
+		concat = concat.replace([np.inf, -np.inf], np.nan).dropna()
+
+		concat.to_csv(self.directory + self.name + "-aggregated-GRADIENT.csv")
+		del(concat)
+		del(bigDF)
+		bigDF = []
+
+		for f in glob.glob(self.directory+"*compiled-BP.csv"):
+			df = pd.read_csv(f)
+			bigDF.append(df)
+
+		concat = pd.concat(bigDF)
+		concat = concat.replace([np.inf, -np.inf], np.nan).dropna()
+
+		concat.to_csv(self.directory + self.name + "-aggregated-BP.csv")
 
 if __name__ == '__main__':
 
 	experiment = Experiment (
-		name="test",
-		directory = "~/Desktop/Ca"
+		name="Cond Media - n=1 - 18th June",
+		directory = "/Users/garethprice/Desktop/5. 5mM CM CM+ab M ~ 10uM/Conditioned Media"
 	)
 
-
-	experiment.names = ['0.01 ADP','0.1 ADP','1 ADP','10 ADP']
-	experiment.times = [101, 296, 519, 744]
-
+	experiment.names = ['ADP', 'ATP', 'UTP']
+	experiment.times = [101, 299, 682]
 	experiment.plotTrace()
 
-	dfs = []
+	gdfs = []
+	bpdfs = []
 	for e in experiment.cells:
 
 		print ''
 		print e.cellname
 		print '-------------------'
-		dfs.append(e.makePandasDF()['g'])
-		for s in e.stimulants:
-			stim = e.stimulants[s]
+		print e.describe()
+		gdfs.append(e.makePandasDF()['g'])
+		bpdfs.append(e.makePandasDF()['bp'])
 
+	experiment.save_csv( pd.concat(gdfs, axis=1).T, 'gradient')
+	experiment.save_csv( pd.concat(bpdfs, axis=1).T, 'bp')
 
-	concat = pd.concat(dfs, axis=1).T
-	print concat
-	concat.to_csv("/Users/garethprice/Desktop/Ca/analysed.csv")
-	concat.plot(kind='bar')
+	experiment.combineAllCsvsInDir()
+
+	sys.exit()
