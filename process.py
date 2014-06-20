@@ -13,6 +13,63 @@ from mpltools import style
 from mpltools import layout
 style.use('ggplot')
 
+def log(message="", verbose=True, colour=None, background=None, bold=False, underline=False, inverted=False, run=False, ret=False):
+    """ log() prints a message that is formatted properly.
+
+        Using ANSI colour and formatting strings, log() prints out a formatted
+        string. If run=True, the following print command (or log())
+        will appear on the same line.
+    """
+
+    if verbose:
+
+        colours = {
+            'black':    '90',
+            'red':      '91',
+            'green':    '92',
+            'yellow':   '93',
+            'blue':     '94',
+            'magenta':  '95',
+            'cyan':     '96',
+            'white':    '97',
+        }
+
+        backgrounds = {
+            'default':  '49',
+            'black':    '100',
+            'red':      '101',
+            'green':    '102',
+            'yellow':   '103',
+            'blue':     '104',
+            'magenta':  '105',
+            'cyan':     '106',
+            'white':    '107'
+        }
+
+        if bold:
+            message = '\033[1m' + message + '\033[21m'
+        if underline:
+            message = '\033[4m' + message + '\033[24m'
+        if background is not None:
+            message = '\033[' + backgrounds[background] + \
+                'm' + message + '\033[49m'
+        if colour is not None:
+            message = '\033[' + colours[colour] + 'm' + message + '\033[0m'
+        if inverted:
+            message = '\033[7m' + message + '\033[27m'
+
+        if ret:
+            return message
+
+        if run:
+            print message,
+        else:
+            print message
+
+    return
+
+
+
 class Point(dict):
 	"""Python Objects that act like Javascript Objects"""
 	def __init__(self, *args, **kwargs):
@@ -136,8 +193,14 @@ class Experiment(object):
 			fig, ax = plt.subplots(1)
 			plt.plot(self.data.time, col, '-')
 			plt.title(col.name)
+			ax.set_ylim(col.min() - (0.1*col.min()), col.max() + (0.1*col.max()))
 			global nameToUse
 			nameToUse = 0
+
+			print ''
+			log(col.name, colour="red")
+			log('-------------------', colour="red")
+
 
 			def onclick(event):
 				global numberOfStimulantsAdded
@@ -147,14 +210,14 @@ class Experiment(object):
 					x1 = event.xdata
 					y1 = event.ydata
 
-					#print '1st point, adding x1:{} y1:{}'.format(x1,y1)
+					log('1st point, adding x1:{} y1:{} to {}'.format(x1,y1,self.names[nameToUse]), colour="black")
 					self.currentCell.addFirstPoint(x1, y1)
 					numberOfStimulantsAdded = 1
 				elif numberOfStimulantsAdded == 1:
 					x2 = event.xdata
 					y2 = event.ydata
 
-					#print '2nd point, adding x2:{} y2:{} to {} out of {} with nametouse: {}'.format(x2,y2,self.names[nameToUse], self.names, nameToUse)
+					log('2nd point, adding x2:{} y2:{} to {}'.format(x2,y2,self.names[nameToUse]), colour="black")
 
 					self.currentCell.addSecondPointWithName(x2, y2, self.names[nameToUse])
 					numberOfStimulantsAdded = 0
@@ -171,11 +234,14 @@ class Experiment(object):
 			plt.show()
 			self.currentCell.cellname = col.name
 			self.cells.append(self.currentCell)
+
+			if self.currentCell.describe() is not None:
+				log(self.currentCell.describe(), colour="blue")
+
 			self.currentCell = Cell()
 
 	def save_csv(self, concat, type):
 		concat.to_csv(self.directory + self.name + "-compiled-"+ type.upper() +".csv")
-		print concat
 
 	def combineAllCsvsInDir(self):
 		bigDF = []
@@ -203,29 +269,55 @@ class Experiment(object):
 
 if __name__ == '__main__':
 
+	# experiment = Experiment (
+	# 	name="Cond Media - n=1 - 18th June",
+	# 	directory = "/Users/garethprice/Desktop/5. 5mM CM CM+ab M ~ 10uM/Conditioned Media"
+	# )
+
+	# experiment.names = ['ADP', 'ATP', 'UTP']
+	# experiment.times = [101, 299,  508]
+
 	experiment = Experiment (
 		name="Cond Media - n=1 - 18th June",
 		directory = "/Users/garethprice/Desktop/5. 5mM CM CM+ab M ~ 10uM/Conditioned Media"
 	)
 
-	experiment.names = ['ADP', 'ATP', 'UTP']
-	experiment.times = [101, 299, 682]
+	experiment.names = ['UTP', 'ATP', 'ADP']
+	experiment.times = [100, 301,  408]
+
+	experiment = Experiment (
+		name="Cond Media - n=1 - 18th June",
+		directory = "/Users/garethprice/Desktop/5. 5mM CM CM+ab M ~ 10uM/Conditioned Media"
+	)
+
+	experiment.names = ['ATP', 'UTP', 'ADP']
+	experiment.times = [97, 313,  566]
+
+	experiment = Experiment (
+		name="Cond Media - n=1 - 18th June",
+		directory = "/Users/garethprice/Desktop/5. 5mM CM CM+ab M ~ 10uM/Conditioned Media"
+	)
+
+	experiment.names = ['ATP', 'ADP', 'UTP']
+	experiment.times = [97, 292, 597]
+
+
 	experiment.plotTrace()
 
 	gdfs = []
 	bpdfs = []
 	for e in experiment.cells:
 
-		print ''
-		print e.cellname
-		print '-------------------'
-		print e.describe()
+		# print ''
+		# print e.cellname
+		# print '-------------------'
+		# print e.describe()
 		gdfs.append(e.makePandasDF()['g'])
 		bpdfs.append(e.makePandasDF()['bp'])
 
 	experiment.save_csv( pd.concat(gdfs, axis=1).T, 'gradient')
 	experiment.save_csv( pd.concat(bpdfs, axis=1).T, 'bp')
 
-	experiment.combineAllCsvsInDir()
+	#experiment.combineAllCsvsInDir()
 
 	sys.exit()
