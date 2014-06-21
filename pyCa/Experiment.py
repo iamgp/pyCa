@@ -13,16 +13,11 @@ import yaml
 import pandas as pd
 import numpy as np
 
-# Graphics Stuff
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-from mpltools import style
-style.use('ggplot')
-
 # pyCa Stuff
 from Helpers import *
 from Cell import *
 from Stimulant import *
+from Graph import Graph
 
 # Globals
 numberOfStimulantsAdded = 0
@@ -93,61 +88,8 @@ class Experiment(object):
 			print 'Converted'
 
 	def plotTrace(self):
-		for i, col in self.data.iteritems():
-
-			if col.name == "time":
-				continue
-
-			fig, ax = plt.subplots(1)
-			plt.plot(self.data.time, col, '-')
-			plt.title(col.name)
-			ax.set_ylim(col.min() - (0.1*col.min()), col.max() + (0.1*col.max()))
-			global nameToUse
-			nameToUse = 0
-
-			print ''
-			log(col.name, colour="red")
-			log('-------------------', colour="red")
-
-
-			def onclick(event):
-				global numberOfStimulantsAdded
-				global nameToUse
-
-				if numberOfStimulantsAdded == 0:
-					x1 = event.xdata
-					y1 = event.ydata
-
-					log('1st point, adding x1:{} y1:{} to {}'.format(x1,y1,self.names[nameToUse]), colour="black")
-
-					self.currentCell.addFirstPoint(x1, y1)
-					numberOfStimulantsAdded = 1
-				elif numberOfStimulantsAdded == 1:
-					x2 = event.xdata
-					y2 = event.ydata
-
-					log('2nd point, adding x2:{} y2:{} to {}'.format(x2,y2,self.names[nameToUse]), colour="black")
-
-					self.currentCell.addSecondPointWithName(x2, y2, self.names[nameToUse])
-					numberOfStimulantsAdded = 0
-					nameToUse = nameToUse + 1
-
-			if nameToUse == len(self.names):
-				continue
-
-			cid = fig.canvas.mpl_connect('button_press_event', onclick)
-
-			for t in self.times:
-				plt.axvspan(t, t+15, color='blue', alpha=0.1)
-
-			plt.show()
-			self.currentCell.cellname = col.name
-			self.cells.append(self.currentCell)
-
-			if self.currentCell.describe() is not None:
-				log(self.currentCell.describe(), colour="black", inverted=True)
-
-			self.currentCell = Cell()
+		g = Graph(Experiment = self)
+		g.plot()
 
 	def save_csv(self, concat, type):
 		concat.to_csv(self.directory + self.name + "-compiled-"+ type.upper() +".csv")
