@@ -52,4 +52,3 @@ def log(message="", verbose=True, colour=None, background=None, bold=False, unde
             print message
 
     return
-

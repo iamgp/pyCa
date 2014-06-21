@@ -7,6 +7,7 @@ import glob
 # Data Stuff
 import xlrd
 import csv
+import yaml
 
 # Maths Stuff
 import pandas as pd
@@ -26,6 +27,36 @@ from Stimulant import *
 # Globals
 numberOfStimulantsAdded = 0
 nameToUse = 0
+
+def scanDirAndSetUpExperiments(directory):
+	with open(os.path.abspath(os.path.expanduser(directory))) as f:
+		y = yaml.load(f)
+
+	for index, a in enumerate(y):
+		names, times = [], []
+		for b in a['stimulants']:
+			names.append(b['name'])
+			times.append(b['time'])
+
+		e = Experiment(
+			name = a['name'],
+			directory = os.path.dirname(directory)
+		)
+		e.names = names
+		e.times = times
+		e.plotTrace()
+
+		gdfs = []
+		bpdfs = []
+		for expt in e.cells:
+			gdfs.append(expt.makePandasDF()['g'])
+			bpdfs.append(expt.makePandasDF()['bp'])
+
+		e.save_csv( pd.concat(gdfs, axis=1).T, 'gradient')
+		e.save_csv( pd.concat(bpdfs, axis=1).T, 'bp')
+
+		if index == len(y):
+			e.combineAllCsvsInDir()
 
 class Experiment(object):
 	"""docstring for Experiment"""
@@ -114,7 +145,7 @@ class Experiment(object):
 			self.cells.append(self.currentCell)
 
 			if self.currentCell.describe() is not None:
-				log(self.currentCell.describe(), colour="blue")
+				log(self.currentCell.describe(), colour="black", inverted=True)
 
 			self.currentCell = Cell()
 
