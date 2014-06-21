@@ -1,0 +1,10 @@
+#!/usr/bin/python
+
+from pyCa import *
+import argparse
+
+parser = argparse.ArgumentParser(description='pyCa')
+parser.add_argument('-t', '--treatment_folder', required=True)
+args = vars(parser.parse_args())
+
+scanDirAndSetUpExperiments(str(args['treatment_folder']) + '/settings.yaml')
