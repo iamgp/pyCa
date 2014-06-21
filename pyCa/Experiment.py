@@ -104,7 +104,7 @@ class Experiment(object):
 		concat = pd.concat(bigDF)
 		concat = concat.replace([np.inf, -np.inf], np.nan).dropna()
 
-		concat.to_csv(self.directory + self.name + "-aggregated-GRADIENT.csv")
+		concat.to_csv(self.directory  + "aggregated-GRADIENT.csv")
 		del(concat)
 		del(bigDF)
 		bigDF = []
@@ -116,4 +116,4 @@ class Experiment(object):
 		concat = pd.concat(bigDF)
 		concat = concat.replace([np.inf, -np.inf], np.nan).dropna()
 
-		concat.to_csv(self.directory + self.name + "-aggregated-BP.csv")
+		concat.to_csv(self.directory + "aggregated-BP.csv")
