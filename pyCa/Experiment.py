@@ -8,6 +8,7 @@ import glob
 import xlrd
 import csv
 import yaml
+import operator
 
 # Maths Stuff
 import pandas as pd
@@ -28,8 +29,16 @@ def scanDirAndSetUpExperiments(directory):
 		y = yaml.load(f)
 
 	for index, a in enumerate(y):
+		test = os.path.abspath(
+			os.path.dirname(directory) + "/" + a['name'] + "-compiled-BP.csv"
+		)
+		if os.path.exists(test):
+			print 'skipping '+a['name']
+			continue
+
 		names, times = [], []
-		for b in a['stimulants']:
+		stimulants = sorted(a['stimulants'], key=lambda k: k['time'])
+		for b in stimulants:
 			names.append(b['name'])
 			times.append(b['time'])
 
@@ -50,7 +59,7 @@ def scanDirAndSetUpExperiments(directory):
 		e.save_csv( pd.concat(gdfs, axis=1).T, 'gradient')
 		e.save_csv( pd.concat(bpdfs, axis=1).T, 'bp')
 
-		if index == len(y):
+		if (index + 1) == len(y):
 			e.combineAllCsvsInDir()
 
 class Experiment(object):

@@ -56,6 +56,7 @@ class Graph(object):
 					self.numberOfStimulantsAdded = 0
 					self.nameToUse = self.nameToUse + 1
 
+
 			cid = fig.canvas.mpl_connect('button_press_event', onclick)
 
 			for t in self.Experiment.times:

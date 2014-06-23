@@ -58,5 +58,7 @@ class Cell(object):
         return {'bp': pd.DataFrame.from_dict({self.cellname: bpdict}), 'g': pd.DataFrame.from_dict({self.cellname: gdict})}
 
     def describe(self):
+        description = ''
         for s in self.stimulants:
-            return self.stimulants[s].description()
+            description += self.stimulants[s].description() + '\n'
+        return description
