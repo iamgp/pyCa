@@ -1,73 +1,79 @@
 from . import *
 
 # Maths Stuff
-import pandas as pd
-import numpy as np
 
 # Graphics Stuff
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-from mpltools import style
-style.use('ggplot')
+# from mpltools import style
+# style.use('ggplot')
+
 
 class Graph(object):
-	"""docstring for Graph"""
-	def __init__(self, Experiment):
-		self.Experiment = Experiment
-		self.numberOfStimulantsAdded = 0
-		self.nameToUse = 0
 
-	def plot(self):
-		for i, col in self.Experiment.data.iteritems():
+    """docstring for Graph"""
 
-			if i == 0:
-				col.name = "time"
+    def __init__(self, Experiment):
+        self.Experiment = Experiment
+        self.numberOfStimulantsAdded = 0
+        self.nameToUse = 0
 
-			if col.name == "time":
-				continue
+    def plot(self):
+        for i, col in self.Experiment.data.iteritems():
 
-			fig, ax = plt.subplots(1)
-			plt.plot(self.Experiment.data.time, col, '-')
-			plt.title(col.name)
-			ax.set_ylim(col.min() - (0.1*col.min()), col.max() + (0.1*col.max()))
-			self.nameToUse = 0
+            if i == 0:
+                col.name = "time"
 
-			print ''
-			log(col.name, colour="red")
-			log('-------------------', colour="red")
+            if col.name == "time":
+                continue
 
-			def onclick(event):
+            fig, ax = plt.subplots(1)
+            plt.plot(self.Experiment.data.time, col, '-')
+            plt.title(col.name)
+            ax.set_ylim(
+                col.min() - (0.1 * col.min()), col.max() + (0.1 * col.max()))
+            self.nameToUse = 0
 
-				if self.numberOfStimulantsAdded == 0:
-					x1 = event.xdata
-					y1 = event.ydata
+            print ''
+            log(col.name, colour="red")
+            log('-------------------', colour="red")
 
-					log('1st point, adding x1:{} y1:{} to {}'.format(x1,y1,self.Experiment.names[self.nameToUse]), colour="black")
+            def onclick(event):
 
-					self.Experiment.currentCell.addFirstPoint(x1, y1)
-					self.numberOfStimulantsAdded = 1
-				elif self.numberOfStimulantsAdded == 1:
-					x2 = event.xdata
-					y2 = event.ydata
+                if self.numberOfStimulantsAdded == 0:
+                    x1 = event.xdata
+                    y1 = event.ydata
 
-					log('2nd point, adding x2:{} y2:{} to {}'.format(x2,y2,self.Experiment.names[self.nameToUse]), colour="black")
+                    log('1st point, adding x1:{} y1:{} to {}'.format(
+                        x1, y1, self.Experiment.names[self.nameToUse]),
+                        colour="black")
 
-					self.Experiment.currentCell.addSecondPointWithName(x2, y2, self.Experiment.names[self.nameToUse])
-					self.numberOfStimulantsAdded = 0
-					self.nameToUse = self.nameToUse + 1
+                    self.Experiment.currentCell.addFirstPoint(x1, y1)
+                    self.numberOfStimulantsAdded = 1
+                elif self.numberOfStimulantsAdded == 1:
+                    x2 = event.xdata
+                    y2 = event.ydata
 
+                    log('2nd point, adding x2:{} y2:{} to {}'.format(
+                        x2, y2, self.Experiment.names[self.nameToUse]),
+                        colour="black")
 
-			cid = fig.canvas.mpl_connect('button_press_event', onclick)
+                    self.Experiment.currentCell.addSecondPointWithName(
+                        x2, y2, self.Experiment.names[self.nameToUse])
+                    self.numberOfStimulantsAdded = 0
+                    self.nameToUse = self.nameToUse + 1
 
-			for t in self.Experiment.times:
-				plt.axvspan(t, t+5, color='red', alpha=0.1)
+            fig.canvas.mpl_connect('button_press_event', onclick)
 
-			plt.show()
+            for t in self.Experiment.times:
+                plt.axvspan(t, t + 5, color='red', alpha=0.1)
 
-			self.Experiment.currentCell.cellname = col.name
-			self.Experiment.cells.append(self.Experiment.currentCell)
+            plt.show()
 
-			if self.Experiment.currentCell.describe() is not None:
-				log(self.Experiment.currentCell.describe(), colour="black", inverted=True)
+            self.Experiment.currentCell.cellname = col.name
+            self.Experiment.cells.append(self.Experiment.currentCell)
 
-			self.Experiment.currentCell = Cell()
+            if self.Experiment.currentCell.describe() is not None:
+                log(self.Experiment.currentCell.describe(),
+                    colour="black", inverted=True)
+
+            self.Experiment.currentCell = Cell()
