@@ -2,9 +2,16 @@
 
 from pyCa import *
 import argparse
+import sys
 
 parser = argparse.ArgumentParser(description='pyCa')
 parser.add_argument('-t', '--treatment_folder', required=True)
+parser.add_argument('-a', '--aggregate', action='store_true')
 args = vars(parser.parse_args())
 
-scanDirAndSetUpExperiments(str(args['treatment_folder']) + '/settings.yaml')
+if args['aggregate']:
+    aggregateData(args['treatment_folder'])
+    sys.exit()
+
+if args['treatment_folder']:
+    scanDirAndSetUpExperiments(str(args['treatment_folder']) + '/settings.yaml')

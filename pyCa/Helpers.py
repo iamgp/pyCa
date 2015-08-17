@@ -1,4 +1,16 @@
-def log(message="", verbose=True, colour=None, background=None, bold=False, underline=False, inverted=False, run=False, ret=False):
+
+
+def log(
+        message="",
+        verbose=True,
+        colour=None,
+        background=None,
+        bold=False,
+        underline=False,
+        inverted=False,
+        run=False,
+        ret=False):
+
     """ log() prints a message that is formatted properly.
 
         Using ANSI colour and formatting strings, log() prints out a formatted

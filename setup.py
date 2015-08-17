@@ -7,4 +7,4 @@ setup(name='pyCa',
       author_email='g@rhinoe.com',
       packages=['pyCa'],
       scripts=["bin/pyCa"]
-     )
+      )
