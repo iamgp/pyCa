@@ -38,6 +38,21 @@ def aggregateData(directory):
 
 
 def scanDirAndSetUpExperiments(directory):
+
+    header = '''
+
+     _ __  _   _  ___ __ _
+    | '_ \| | | |/ __/ _` |
+    | |_) | |_| | (_| (_| |
+    | .__/ \__, |\___\__,_|
+    | |     __/ |
+    |_|    |___/
+
+
+Directory: {0}'''.format(os.path.abspath(os.path.dirname(directory)))
+
+    log(header, colour="yellow")
+
     with open(os.path.abspath(os.path.expanduser(directory))) as f:
         y = yaml.load(f)
 
@@ -47,7 +62,7 @@ def scanDirAndSetUpExperiments(directory):
                 'name'] + "-compiled-BP.csv"
         )
         if os.path.exists(test):
-            print 'skipping ' + a['name']
+            log('> skipping ' + a['name'])
             continue
 
         names, times = [], []
@@ -110,7 +125,7 @@ class Experiment(object):
         for rownum in xrange(sh.nrows):
             wr.writerow(sh.row_values(rownum))
 
-        print 'Converted'
+        log('\n> Converted!')
 
     def plotTrace(self):
         g = Graph(Experiment=self)

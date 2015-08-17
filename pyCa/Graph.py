@@ -1,11 +1,7 @@
 from . import *
 
-# Maths Stuff
-
 # Graphics Stuff
 import matplotlib.pyplot as plt
-# from mpltools import style
-# style.use('ggplot')
 
 
 class Graph(object):
@@ -18,6 +14,10 @@ class Graph(object):
         self.nameToUse = 0
 
     def plot(self):
+        print ''
+        log(self.Experiment.name, colour="yellow")
+        log('==================', colour="yellow")
+
         for i, col in self.Experiment.data.iteritems():
 
             if i == 0:
@@ -35,7 +35,7 @@ class Graph(object):
 
             print ''
             log(col.name, colour="red")
-            log('-------------------', colour="red")
+            log('--------------------------------------', colour="red")
 
             def onclick(event):
 
@@ -43,7 +43,7 @@ class Graph(object):
                     x1 = event.xdata
                     y1 = event.ydata
 
-                    log('1st point, adding x1:{} y1:{} to {}'.format(
+                    log(' > 1st point, adding x1:{} y1:{} to {}'.format(
                         x1, y1, self.Experiment.names[self.nameToUse]),
                         colour="black")
 
@@ -53,7 +53,7 @@ class Graph(object):
                     x2 = event.xdata
                     y2 = event.ydata
 
-                    log('2nd point, adding x2:{} y2:{} to {}'.format(
+                    log(' > 2nd point, adding x2:{} y2:{} to {}'.format(
                         x2, y2, self.Experiment.names[self.nameToUse]),
                         colour="black")
 
@@ -74,6 +74,6 @@ class Graph(object):
 
             if self.Experiment.currentCell.describe() is not None:
                 log(self.Experiment.currentCell.describe(),
-                    colour="black", inverted=True)
+                    colour="black")
 
             self.Experiment.currentCell = Cell()

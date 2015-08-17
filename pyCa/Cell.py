@@ -60,5 +60,5 @@ class Cell(object):
     def describe(self):
         description = ''
         for s in self.stimulants:
-            description += self.stimulants[s].description() + '\n'
+            description += ' >> ' + self.stimulants[s].description() + '\n'
         return description
